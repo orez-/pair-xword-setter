@@ -1,5 +1,5 @@
-const width = 12;
-const height = 12;
+const width = 13;
+const height = 13;
 let selected = null;
 
 const buildGrid = () => {
@@ -16,10 +16,9 @@ const buildGrid = () => {
 
 const deselect = () => {
   const grid = document.getElementById("grid");
-  if (!selected) { return }
-  let {x, y} = selected;
-  let cell = grid.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
-  if (!cell) { return }
+  if (!selected) return;
+  let cell = getCell(selected);
+  if (!cell) return;
   cell.classList.remove("selected");
 }
 
@@ -32,42 +31,63 @@ const selectDomCell = target => {
   };
 }
 
-const selectCell = ({x, y}) => {
-  let cell = grid.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+const getCell = ({x, y}) => grid.querySelector(`.cell[data-x='${x}'][data-y='${y}']`);
+
+const selectCell = (target) => {
+  let cell = getCell(target);
   selectDomCell(cell);
 }
 
 window.onload = evt => {
   const grid = document.getElementById("grid");
   buildGrid();
+
   grid.onclick = evt => {
     const target = evt.target;
-    if (!target.classList.contains("cell")) { return }
+    if (!target.classList.contains("cell")) return;
     selectDomCell(target);
-  }
+  };
+
+  document.addEventListener('contextmenu', evt => {
+    event.preventDefault();
+    const target = evt.target;
+    if (!target.classList.contains("cell")) return;
+    target.style.backgroundColor = "#111";
+  });
 };
 
 window.onkeydown = evt => {
   switch (evt.keyCode) {
-    case 37:
+    case 37: // <
       if (selected && selected.x > 0) {
         selectCell({x: selected.x - 1, y: selected.y});
       }
       break;
-    case 38:
+    case 38: // ^
       if (selected && selected.y > 0) {
         selectCell({x: selected.x, y: selected.y - 1});
       }
       break;
-    case 39:
+    case 39: // >
       if (selected && selected.x < width-1) {
         selectCell({x: selected.x + 1, y: selected.y});
       }
       break;
-    case 40:
+    case 40: // v
       if (selected && selected.y < height-1) {
         selectCell({x: selected.x, y: selected.y + 1});
       }
       break;
+    case 8: // bksp
+      let cell = getCell(selected);
+      cell.textContent = cell.textContent.slice(0, -1);
+      break;
+    default:
+      if (evt.ctrlKey || evt.altKey || evt.metaKey) return;
+      if (evt.keyCode > 64 && evt.keyCode < 91) {
+        let chr = String.fromCharCode(evt.keyCode);
+        let cell = getCell(selected);
+        cell.textContent += chr;
+      }
   }
 };
