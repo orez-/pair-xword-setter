@@ -11,10 +11,33 @@
     evt.preventDefault();
     const idx = y * width + x;
     grid[idx].wall ^= true;
+    if (grid[idx].wall) {
+      grid[idx].fill = "";
+    }
   }
 
   const handleKey = evt => {
     switch (evt.keyCode) {
+      case 9: // tab
+        evt.preventDefault();
+        if (evt.shiftKey) {
+          if (selected && selected.x > 0) {
+            selected = ({x: selected.x - 1, y: selected.y});
+          } else if (selected && selected.y > 0) {
+            selected = ({x: width-1, y: selected.y - 1});
+          } else {
+            selected = {x: width-1, y: height-1};
+          }
+        } else {
+          if (selected && selected.x < width-1) {
+            selected = ({x: selected.x + 1, y: selected.y});
+          } else if (selected && selected.y < height-1) {
+            selected = ({x: 0, y: selected.y + 1});
+          } else {
+            selected = {x: 0, y: 0};
+          }
+        }
+        break;
       case 37: // <
         if (selected && selected.x > 0) {
           selected = ({x: selected.x - 1, y: selected.y});
@@ -45,6 +68,7 @@
         if (evt.keyCode > 64 && evt.keyCode < 91) {
           const chr = String.fromCharCode(evt.keyCode);
           const idx = selected.y * width + selected.x;
+          if (grid[idx].wall) return;
           if (grid[idx].fill.length < cellFillLen) {
             grid[idx].fill += chr;
           }
@@ -89,10 +113,11 @@
     height: 1.5em;
     text-align: center;
     font-family: "DejaVu Sans Mono", monospace;
+    user-select: none;
   }
 
   .selected.wall {
-    background-color: #881;
+    background-color: #441;
   }
 
   .selected {
