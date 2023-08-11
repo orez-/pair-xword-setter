@@ -1,0 +1,30 @@
+#body-wrapper {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-gap: 10px;
+}
+
+#cell-data {
+  background-color: lightyellow;
+}
+
+#grid-wrapper {
+  display: inline-block;
+}
+
+#grid {
+  display: grid;
+  background-color: #111;
+  grid-gap: 1px;
+  padding: 1px;
+}
+
+.cell {
+  background-color: white;
+  width: 1.5em;
+  height: 1.5em;
+}
+
+.selected {
+  background-color: yellow;
+}
