@@ -1,7 +1,7 @@
 const chunkLen = 2;
 
 export default async () => {
-  const file = await fetch("/dict.txt");
+  const file = await fetch("/dict/words.txt");
   const text = await file.text();
   const entries = filterMap(text.split('\n'), toEntry);
   const chunkIndex = new Map;
