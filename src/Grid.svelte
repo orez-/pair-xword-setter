@@ -22,8 +22,8 @@
   const dispatchUpdate = () => {
     let idx = selected.y * width + selected.x;
     dispatch('update', {
-      verticalPattern: verticalPattern(selected),
-      horizontalPattern: horizontalPattern(selected),
+      downPattern: downPattern(selected),
+      acrossPattern: acrossPattern(selected),
       cell: grid[idx],
     });
   }
@@ -78,8 +78,8 @@
     return { pattern: gridChunks, index: chunkIndex };
   }
 
-  const horizontalPattern = acrossStep(snagPattern);
-  const verticalPattern = downStep(snagPattern);
+  const acrossPattern = acrossStep(snagPattern);
+  const downPattern = downStep(snagPattern);
 
   // fns for setting a full clue starting at some coordinate.
   // delimits the clue with walls, if needed.

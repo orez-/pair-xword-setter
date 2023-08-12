@@ -6,8 +6,8 @@
 
   const cellFillLen = 2;
   let dict = null;
-  let verticalFills = null;
-  let horizontalFills = null;
+  let downFills = null;
+  let acrossFills = null;
   let cellFills = null;
   onMount(async () => {
     dict = await loadDict();
@@ -27,8 +27,8 @@
 
   const generateCellOptions = evt => {
     if (evt.detail.cell?.wall) {
-      verticalFills = null;
-      horizontalFills = null;
+      downFills = null;
+      acrossFills = null;
       cellFills = null;
       return
     }
@@ -42,17 +42,17 @@
       return null;
     }
 
-    verticalFills = getStats(evt.detail.verticalPattern);
-    horizontalFills = getStats(evt.detail.horizontalPattern);
+    downFills = getStats(evt.detail.downPattern);
+    acrossFills = getStats(evt.detail.acrossPattern);
 
     // Limit to entries that are fill-able on the other axis.
     // XXX: should this be toggleable?
-    verticalFills = verticalFills?.filter(({ entry, pivotIdx }) => {
+    downFills = downFills?.filter(({ entry, pivotIdx }) => {
       let idx = pivotIdx * cellFillLen;
       let pivot = entry.word.slice(idx, idx + cellFillLen);
       return allCellFills.has(pivot);
     });
-    horizontalFills = horizontalFills?.filter(({ entry, pivotIdx }) => {
+    acrossFills = acrossFills?.filter(({ entry, pivotIdx }) => {
       let idx = pivotIdx * cellFillLen;
       let pivot = entry.word.slice(idx, idx + cellFillLen);
       return allCellFills.has(pivot);
@@ -73,7 +73,7 @@
 
 <div id="body-wrapper">
   <Grid on:update={generateCellOptions} {cellFillLen} />
-  <CellInfo {dict} {verticalFills} {horizontalFills} {cellFills} {cellFillLen} />
+  <CellInfo {dict} {downFills} {acrossFills} {cellFills} {cellFillLen} />
 </div>
 
 <style>

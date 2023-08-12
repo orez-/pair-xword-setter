@@ -1,7 +1,7 @@
 <script>
   export let dict;
-  export let horizontalFills;
-  export let verticalFills;
+  export let acrossFills;
+  export let downFills;
   export let cellFills;
   export let cellFillLen;
 
@@ -18,19 +18,19 @@
 <div id="cell-data">
   {#if dict}
     <ul>
-      <li>{horizontalFills?.length ?? "?"} potential fills horizontally.
-        {#if horizontalFills}
+      <li>{acrossFills?.length ?? "?"} potential across fills.
+        {#if acrossFills}
           <div class="word-grid">
-            {#each horizontalFills.slice(0, 100) as entry}
-              <div>{@html highlightEntry(entry)}</div>
+            {#each acrossFills.slice(0, 100) as entry}
+              <a on:click={() => console.log(entry)}>{@html highlightEntry(entry)}</a>
             {/each}
           </div>
         {/if}
       </li>
-      <li>{verticalFills?.length ?? "?"} potential fills vertically.
-        {#if verticalFills}
+      <li>{downFills?.length ?? "?"} potential down fills.
+        {#if downFills}
           <div class="word-grid">
-            {#each verticalFills.slice(0, 100) as entry}
+            {#each downFills.slice(0, 100) as entry}
               <div>{@html highlightEntry(entry)}</div>
             {/each}
           </div>
