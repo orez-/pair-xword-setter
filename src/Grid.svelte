@@ -110,6 +110,13 @@
 
   // ===
 
+  export const setFillAtSelected = fill => {
+    let idx = selected.y * width + selected.x;
+    grid[idx].wall = false;  // ᖍ(∙⟞∙)ᖌ
+    grid[idx].fill = fill;
+    dispatchUpdate();
+  }
+
   const toggleWall = (evt, x, y) => {
     evt.preventDefault();
     const idx = y * width + x;

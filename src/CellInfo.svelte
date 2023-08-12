@@ -55,7 +55,7 @@
         {#if cellFills}
           <div class="letter-grid">
             {#each cellFills as fill}
-              <a>{fill}</a>
+              <a on:click={() => dispatch('fillCell', { fill })}>{fill}</a>
             {/each}
           </div>
         {/if}

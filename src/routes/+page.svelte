@@ -77,6 +77,7 @@
   <CellInfo {dict} {downFills} {acrossFills} {cellFills} {cellFillLen}
     on:fillAcross={evt => grid.setAcrossFillAtSelected(evt.detail)}
     on:fillDown={evt => grid.setDownFillAtSelected(evt.detail)}
+    on:fillCell={evt => grid.setFillAtSelected(evt.detail.fill)}
   />
 </div>
 
