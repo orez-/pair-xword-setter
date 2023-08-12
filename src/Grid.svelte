@@ -13,9 +13,11 @@
 
   const setSelected = sel => {
     selected = sel;
+    let idx = sel.y * width + sel.x;
     dispatch('cellSelect', {
       verticalPattern: verticalPattern(selected),
       horizontalPattern: horizontalPattern(selected),
+      cell: grid[idx],
     });
   }
 

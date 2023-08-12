@@ -26,6 +26,12 @@
   }
 
   const generateCellOptions = evt => {
+    if (evt.detail.cell?.wall) {
+      verticalFills = null;
+      horizontalFills = null;
+      cellFills = null;
+      return
+    }
     let allCellFills;
     const getStats = ({ pattern, index }) => {
       if (pattern.some(cell => cell)) {
@@ -52,8 +58,12 @@
       return allCellFills.has(pivot);
     });
 
-    cellFills = [...allCellFills];
-    cellFills.sort();
+    if (allCellFills != null) {
+      cellFills = [...allCellFills];
+      cellFills.sort();
+    } else {
+      cellFills = null;
+    }
   }
 </script>
 
