@@ -31,12 +31,15 @@ function filterFit(gridChunks, pivotIndex) {
   let gridFills = [];
   let pivotFills = new Set;
 
+  // `anchor` is the real-ass text closest to our pivot point.
+  //   we use this to lookup potential words.
+  // `pivot` is our focal cell. It's probably empty, but it _must_
+  //   but included within the suggested word.
   const fitEm = anchorIdx => {
     let anchor = gridChunks[anchorIdx];
     let words = this.chunkIndex.get(anchor) || [];
     for (const entry of words) {
-      const word = entry.word;
-      const wordChunks = chunked(word);
+      const wordChunks = chunked(entry.word);
       for (const [wordIdx, chunk] of wordChunks.entries()) {
         if (chunk == anchor) {  // try anchoring here
           // word       ["AB", "CD", "EF", "GH"]
@@ -50,7 +53,7 @@ function filterFit(gridChunks, pivotIndex) {
           const gridStart = anchorIdx - wordIdx;
           const gridEnd = gridStart + wordChunks.length;
 
-          const wordPivotIdx = pivotIndex - wordIdx;
+          const wordPivotIdx = pivotIndex - gridStart;
           // we wanna include the pivot pt in the words we're lookin for.
           // that's... the whole point.
           if (wordPivotIdx < 0 || wordPivotIdx >= wordChunks.length) continue;
@@ -60,9 +63,9 @@ function filterFit(gridChunks, pivotIndex) {
           // bad boundary: can't place the bookending wall
           if (gridStart > 0 && gridChunks[gridStart - 1]) continue;
 
-          if (gridEnd > grid.length) continue; // `word` ends too late
+          if (gridEnd > gridChunks.length) continue; // `word` ends too late
           // bad boundary: can't place the bookending wall
-          if (gridEnd < grid.length && gridChunks[gridEnd + 1]) continue;
+          if (gridEnd < gridChunks.length && gridChunks[gridEnd + 1]) continue;
 
           // all characters fit
           const fits = wordChunks.every((chunk, idx) => {
