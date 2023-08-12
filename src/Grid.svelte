@@ -2,8 +2,8 @@
   import { createEventDispatcher } from 'svelte';
 
   const cellFillLen = 2;
-  const height = 13;
-  const width = 13;
+  const height = 20;
+  const width = 20;
 
   const dispatch = createEventDispatcher();
 

@@ -3,6 +3,16 @@
   export let horizontalFills;
   export let verticalFills;
   export let cellFills;
+
+  const highlightEntry = ({entry, pivotIdx}) => {
+    const cellFillLen = 2;
+    const wordStart = pivotIdx * cellFillLen;
+    const wordEnd = wordStart + cellFillLen;
+    const front = entry.word.slice(0, wordStart);
+    const pivot = entry.word.slice(wordStart, wordEnd);
+    const back = entry.word.slice(wordEnd);
+    return `${front}<b>${pivot}</b>${back}`;
+  };
 </script>
 
 <div id="cell-data">
@@ -12,7 +22,7 @@
         {#if horizontalFills}
           <div class="word-grid">
             {#each horizontalFills.slice(0, 100) as entry}
-              <div>{entry.entry.word}</div>
+              <div>{@html highlightEntry(entry)}</div>
             {/each}
           </div>
         {/if}
@@ -21,7 +31,7 @@
         {#if verticalFills}
           <div class="word-grid">
             {#each verticalFills.slice(0, 100) as entry}
-              <div>{entry.entry.word}</div>
+              <div>{@html highlightEntry(entry)}</div>
             {/each}
           </div>
         {/if}

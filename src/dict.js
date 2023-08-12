@@ -65,7 +65,7 @@ function filterFit(gridChunks, pivotIndex) {
 
           if (gridEnd > gridChunks.length) continue; // `word` ends too late
           // bad boundary: can't place the bookending wall
-          if (gridEnd < gridChunks.length && gridChunks[gridEnd + 1]) continue;
+          if (gridEnd < gridChunks.length && gridChunks[gridEnd]) continue;
 
           // all characters fit
           const fits = wordChunks.every((chunk, idx) => {
@@ -75,7 +75,7 @@ function filterFit(gridChunks, pivotIndex) {
           if (!fits) continue;
 
           // we good!
-          gridFills.push({ entry, gridStart });
+          gridFills.push({ entry, pivotIdx: wordPivotIdx});
           pivotFills.add(pivot);
         }
       }
