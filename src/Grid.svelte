@@ -85,8 +85,8 @@
   // delimits the clue with walls, if needed.
 
   // XXX: does not check that this is legal fill
-  const setFill = ({front, back, step, x, y, word}) => {
-    let idx = y * width + x;
+  const setFill = ({front, back, step, x, y, word, pivotIdx}) => {
+    let idx = y * width + x - pivotIdx * step;
     if (front <= idx - step) {
       grid[idx - step].fill = "";
       grid[idx - step].wall = true;
@@ -105,6 +105,8 @@
 
   const setAcrossFill = acrossStep(setFill);
   const setDownFill = downStep(setFill);
+  export const setAcrossFillAtSelected = ({...args}) => setAcrossFill({...selected, ...args});
+  export const setDownFillAtSelected = ({...args}) => setDownFill({...selected, ...args});
 
   // ===
 

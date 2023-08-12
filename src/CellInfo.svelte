@@ -1,9 +1,12 @@
 <script>
+  import { createEventDispatcher } from 'svelte';
   export let dict;
   export let acrossFills;
   export let downFills;
   export let cellFills;
   export let cellFillLen;
+
+  const dispatch = createEventDispatcher();
 
   const highlightEntry = ({entry, pivotIdx}) => {
     const wordStart = pivotIdx * cellFillLen;
@@ -22,7 +25,13 @@
         {#if acrossFills}
           <div class="word-grid">
             {#each acrossFills.slice(0, 100) as entry}
-              <a on:click={() => console.log(entry)}>{@html highlightEntry(entry)}</a>
+              <a on:click={() => dispatch('fillAcross', {
+                  word: entry.entry.word,
+                  pivotIdx: entry.pivotIdx,
+                })
+              }>
+                {@html highlightEntry(entry)}
+              </a>
             {/each}
           </div>
         {/if}
@@ -31,7 +40,13 @@
         {#if downFills}
           <div class="word-grid">
             {#each downFills.slice(0, 100) as entry}
-              <div>{@html highlightEntry(entry)}</div>
+              <a on:click={() => dispatch('fillDown', {
+                  word: entry.entry.word,
+                  pivotIdx: entry.pivotIdx,
+                })
+              }>
+                {@html highlightEntry(entry)}
+              </a>
             {/each}
           </div>
         {/if}
@@ -81,5 +96,9 @@
   .letter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
+  }
+
+  a {
+    cursor: pointer;
   }
 </style>

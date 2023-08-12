@@ -5,6 +5,7 @@
   import loadDict from '../dict.js';
 
   const cellFillLen = 2;
+  let grid;
   let dict = null;
   let downFills = null;
   let acrossFills = null;
@@ -72,8 +73,11 @@
 </svelte:head>
 
 <div id="body-wrapper">
-  <Grid on:update={generateCellOptions} {cellFillLen} />
-  <CellInfo {dict} {downFills} {acrossFills} {cellFills} {cellFillLen} />
+  <Grid bind:this={grid} on:update={generateCellOptions} {cellFillLen} />
+  <CellInfo {dict} {downFills} {acrossFills} {cellFills} {cellFillLen}
+    on:fillAcross={evt => grid.setAcrossFillAtSelected(evt.detail)}
+    on:fillDown={evt => grid.setDownFillAtSelected(evt.detail)}
+  />
 </div>
 
 <style>
