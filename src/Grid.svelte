@@ -1,7 +1,10 @@
 <script>
   import { createEventDispatcher } from 'svelte';
+  import { chunked as chunkedGen } from './util';
 
   export let cellFillLen;
+  const chunked = word => chunkedGen(word, cellFillLen);
+
   const height = 20;
   const width = 20;
 
@@ -25,6 +28,35 @@
     });
   }
 
+  // silly overkill decorators for fns which step through
+  // the grid either Down or Across.
+  // The decorated function should be generic over, and accept,:
+  // - `x` and `y`, some starting position
+  // - `front`, representing the index of the start of the axis (inclusive)
+  // - `back`, representing the index past the end of the axis (exclusive)
+  // - `step`, the amount to step the index by
+
+  const downStep = fn => ({x, y, ...kwargs}) => fn({
+    x, y, ...kwargs,
+    front: 0,
+    back: grid.length,
+    step: width,
+  });
+
+  const acrossStep = fn => ({x, y, ...kwargs}) => {
+    const row = y * width;
+    return fn({
+      x, y, ...kwargs,
+      front: row,
+      back: row + width,
+      step: 1,
+    });
+  }
+
+  // fns for fetching the "fill pattern" around some coordinate.
+  // A "pattern" (: [String]) is the cell fill before and after
+  // the coordinate in the given axis, from wall to wall.
+
   const snagPattern = ({front, back, step, x, y}) => {
     const ERROR = null;
     let chunkIndex = -1;
@@ -38,28 +70,43 @@
     const gridChunks = [];
     for(idx = start; idx < back && !grid[idx].wall; idx += step) {
       const fill = grid[idx].fill;
-      if (fill.length && fill.length != cellFillLen) return ERROR;
-      gridChunks.push(fill);
+      // XXX: omit partially-filled cells, for now
+      if (!fill.length || fill.length == cellFillLen) {
+        gridChunks.push(fill);
+      }
     }
     return { pattern: gridChunks, index: chunkIndex };
   }
 
-  const horizontalPattern = ({x, y}) => {
-    const row = y * width;
-    return snagPattern({
-      x, y,
-      front: row,
-      back: row + width,
-      step: 1,
-    });
-  }
+  const horizontalPattern = acrossStep(snagPattern);
+  const verticalPattern = downStep(snagPattern);
 
-  const verticalPattern = ({x, y}) => snagPattern({
-    x, y,
-    front: 0,
-    back: grid.length,
-    step: width,
-  });
+  // fns for setting a full clue starting at some coordinate.
+  // delimits the clue with walls, if needed.
+
+  // XXX: does not check that this is legal fill
+  const setFill = ({front, back, step, x, y, word}) => {
+    let idx = y * width + x;
+    if (front <= idx - step) {
+      grid[idx - step].fill = "";
+      grid[idx - step].wall = true;
+    }
+    for (const chunk of chunked(word)) {
+      grid[idx].fill = chunk;
+      grid[idx].wall = false;
+      idx += step;
+    }
+    if (idx < back) {
+      grid[idx].fill = "";
+      grid[idx].wall = true;
+    }
+    dispatchUpdate();
+  };
+
+  const setAcrossFill = acrossStep(setFill);
+  const setDownFill = downStep(setFill);
+
+  // ===
 
   const toggleWall = (evt, x, y) => {
     evt.preventDefault();

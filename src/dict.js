@@ -1,5 +1,8 @@
 const chunkLen = 2;
 
+import { chunked as chunkedGen, filterMap, keyToCmp } from "./util";
+const chunked = word => chunkedGen(word, chunkLen);
+
 export default async () => {
   const file = await fetch("/dict/words.txt");
   const text = await file.text();
@@ -128,36 +131,4 @@ const toEntry = line => {
   const chunks = new Set(chunked(word));
   score = +score;
   return { word, score, chunks }
-}
-
-const filterMap = (arr, fn) => {
-  return arr.reduce((acc, item, idx) => {
-    let mapped = fn(item, idx);
-    if (mapped != null) acc.push(mapped);
-    return acc;
-  }, []);
-}
-
-const chunked = word => {
-  let chunks = [];
-  for (let idx = 0; idx < word.length; idx += chunkLen) {
-    const chunk = word.substring(idx, idx + chunkLen);
-    chunks.push(chunk);
-  }
-  return chunks;
-}
-
-// makes a LOT of assumptions.
-// JS is not a serious language.
-const keyToCmp = fn => (a, b) => {
-  const left = fn(a);
-  const right = fn(b);
-  for (let idx = 0; idx < left.length; idx++) {
-    if (left[idx] < right[idx]) {
-      return -1;
-    } else if (left[idx] > right[idx]) {
-      return 1;
-    }
-  }
-  return 0;
 }
