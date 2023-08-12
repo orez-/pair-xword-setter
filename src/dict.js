@@ -103,7 +103,21 @@ function filterFit(gridChunks, pivotIndex) {
       }
     }
   }
-  gridFills.sort((a, b) => b.entry.score - a.entry.score);
+  gridFills.sort(keyToCmp(elem => [-elem.entry.score, elem.entry.word, elem.pivotIdx]));
+  // this is `dedupe`, but we avoid writing a util function for it
+  // because somehow JS has gotten away with being the only modern
+  // language to not provide _equality_ out of the box.
+  let prev = null;
+  gridFills = gridFills.reduce((acc, elem) => {
+    // XXX: this equality check is brittle and sucks.
+    // in particular `entry` is doing an identity check.
+    if (!(prev && elem.pivotIdx == prev.pivotIdx && elem.entry == prev.entry)) {
+      acc.push(elem);
+      prev = elem;
+    }
+    return acc;
+  }, []);
+
   return { gridFills, cellFills: pivotFills };
 }
 
@@ -131,4 +145,19 @@ const chunked = word => {
     chunks.push(chunk);
   }
   return chunks;
+}
+
+// makes a LOT of assumptions.
+// JS is not a serious language.
+const keyToCmp = fn => (a, b) => {
+  const left = fn(a);
+  const right = fn(b);
+  for (let idx = 0; idx < left.length; idx++) {
+    if (left[idx] < right[idx]) {
+      return -1;
+    } else if (left[idx] > right[idx]) {
+      return 1;
+    }
+  }
+  return 0;
 }
