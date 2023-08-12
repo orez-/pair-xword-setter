@@ -1,7 +1,7 @@
 <script>
   import { createEventDispatcher } from 'svelte';
 
-  const cellFillLen = 2;
+  export let cellFillLen;
   const height = 20;
   const width = 20;
 

@@ -3,9 +3,9 @@
   export let horizontalFills;
   export let verticalFills;
   export let cellFills;
+  export let cellFillLen;
 
   const highlightEntry = ({entry, pivotIdx}) => {
-    const cellFillLen = 2;
     const wordStart = pivotIdx * cellFillLen;
     const wordEnd = wordStart + cellFillLen;
     const front = entry.word.slice(0, wordStart);
