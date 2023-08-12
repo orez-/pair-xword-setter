@@ -2,6 +2,7 @@
   export let dict;
   export let horizontalFills;
   export let verticalFills;
+  export let cellFills;
 </script>
 
 <div id="cell-data">
@@ -9,9 +10,14 @@
     <ul>
       <li>{horizontalFills ?? "?"} potential fills horizontally.</li>
       <li>{verticalFills ?? "?"} potential fills vertically.</li>
-      <li>{0} potential fills for this cell:
-        <ul id="cell-fills">
-        </ul>
+      <li>{cellFills?.length ?? "?"} potential fills for this cell:
+        {#if cellFills}
+          <div class="grid">
+            {#each cellFills as fill}
+              <a>{fill}</a>
+            {/each}
+          </div>
+        {/if}
       </li>
     </ul>
   {:else}
@@ -34,5 +40,10 @@
   #cell-data {
     background-color: lightyellow;
     font-family: Arial;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
   }
 </style>

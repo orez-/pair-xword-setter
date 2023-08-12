@@ -24,11 +24,12 @@ function filterFit(gridChunks, pivotIndex) {
   // anchorIdx is relative to gridChunks
   // wordIdx is relative to wordChunks
 
-  // TODO: `out` is sucks.
+  // TODO: `gridFills` is sucks.
   // we want a Set<(String, usize)>,
   // but js makes this hell.
   // (usize => idx into `grid`)
-  let out = [];
+  let gridFills = [];
+  let pivotFills = new Set;
 
   const fitEm = anchorIdx => {
     let anchor = gridChunks[anchorIdx];
@@ -49,11 +50,11 @@ function filterFit(gridChunks, pivotIndex) {
           const gridStart = anchorIdx - wordIdx;
           const gridEnd = gridStart + wordChunks.length;
 
-          // word[wordPivotIdx] == pivot
           const wordPivotIdx = pivotIndex - wordIdx;
           // we wanna include the pivot pt in the words we're lookin for.
           // that's... the whole point.
           if (wordPivotIdx < 0 || wordPivotIdx >= wordChunks.length) continue;
+          const pivot = wordChunks[wordPivotIdx];
 
           if (gridStart < 0) continue; // `word` starts too early
           // bad boundary: can't place the bookending wall
@@ -71,7 +72,8 @@ function filterFit(gridChunks, pivotIndex) {
           if (!fits) continue;
 
           // we good!
-          out.push({ entry, gridStart });
+          gridFills.push({ entry, gridStart });
+          pivotFills.add(pivot);
         }
       }
     }
@@ -98,14 +100,14 @@ function filterFit(gridChunks, pivotIndex) {
       }
     }
   }
-  return out;
+  return { gridFills, cellFills: pivotFills };
 }
 
 const toEntry = line => {
   let [word, score] = line.split(';');
   if (!word.match(`^([A-Z]{${chunkLen}})+$`)) return null;
 
-  const chunks = new Set([...chunked(word)]);
+  const chunks = new Set(chunked(word));
   score = +score;
   return { word, score, chunks }
 }

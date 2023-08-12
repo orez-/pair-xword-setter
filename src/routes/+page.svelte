@@ -7,28 +7,44 @@
   let dict = null;
   let verticalFills = null;
   let horizontalFills = null;
+  let cellFills = null;
   onMount(async () => {
     dict = await loadDict();
   });
 
+  const intersect = (left, right) => {
+    let both = new Set;
+    for (const elem of right) {
+      if (left.has(elem)) {
+        both.add(elem);
+      }
+    }
+    return both;
+  }
+
   const generateCellOptions = evt => {
+    let allCellFills;
     {
       const { pattern, index } = evt.detail.verticalPattern;
-      const vfits = dict.filterFit(pattern, index);
-      verticalFills = vfits.length;
+      const { gridFills, cellFills } = dict.filterFit(pattern, index);
+      verticalFills = gridFills.length;
+      allCellFills = cellFills;
     }
 
     {
       const { pattern, index } = evt.detail.horizontalPattern;
-      const hfits = dict.filterFit(pattern, index);
-      horizontalFills = hfits.length;
+      const { gridFills, cellFills } = dict.filterFit(pattern, index);
+      horizontalFills = gridFills.length;
+      allCellFills = intersect(allCellFills, cellFills);
     }
+    cellFills = [...allCellFills];
+    cellFills.sort();
   }
 </script>
 
 <div id="body-wrapper">
   <Grid on:cellSelect={generateCellOptions} />
-  <CellInfo {dict} {verticalFills} {horizontalFills} />
+  <CellInfo {dict} {verticalFills} {horizontalFills} {cellFills} />
 </div>
 
 <style>
