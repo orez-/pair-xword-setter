@@ -29,7 +29,7 @@
     const getStats = ({ pattern, index }) => {
       if (pattern.some(cell => cell)) {
         const { gridFills, cellFills } = dict.filterFit(pattern, index);
-        allCellFills = cellFills;
+        allCellFills = intersect(allCellFills, cellFills);
         return gridFills;
       }
       return null;
@@ -41,6 +41,10 @@
     cellFills.sort();
   }
 </script>
+
+<svelte:head>
+  <title>Pair XWord Setter</title>
+</svelte:head>
 
 <div id="body-wrapper">
   <Grid on:cellSelect={generateCellOptions} />
