@@ -13,8 +13,12 @@
 
   const setSelected = sel => {
     selected = sel;
-    let idx = sel.y * width + sel.x;
-    dispatch('cellSelect', {
+    dispatchUpdate();
+  }
+
+  const dispatchUpdate = () => {
+    let idx = selected.y * width + selected.x;
+    dispatch('update', {
       verticalPattern: verticalPattern(selected),
       horizontalPattern: horizontalPattern(selected),
       cell: grid[idx],
@@ -64,6 +68,7 @@
     if (grid[idx].wall) {
       grid[idx].fill = "";
     }
+    dispatchUpdate();
   }
 
   const handleKey = evt => {
@@ -117,6 +122,7 @@
         const idx = selected.y * width + selected.x;
         if (grid[idx].fill.length) {
           grid[idx].fill = "";
+          dispatchUpdate();
         } else if (selected.x != 0 && !grid[idx-1].wall) {
           setSelected({x: selected.x - 1, y: selected.y});
         }
@@ -129,6 +135,7 @@
           if (grid[idx].wall) return;
           if (grid[idx].fill.length < cellFillLen) {
             grid[idx].fill += chr;
+            dispatchUpdate();
           }
         }
     }

@@ -11,7 +11,7 @@
     const front = entry.word.slice(0, wordStart);
     const pivot = entry.word.slice(wordStart, wordEnd);
     const back = entry.word.slice(wordEnd);
-    return `${front}<b>${pivot}</b>${back}`;
+    return `${front}<strong>${pivot}</strong>${back}`;
   };
 </script>
 
@@ -71,6 +71,11 @@
   .word-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .word-grid > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .letter-grid {

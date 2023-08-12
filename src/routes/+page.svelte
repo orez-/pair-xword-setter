@@ -72,7 +72,7 @@
 </svelte:head>
 
 <div id="body-wrapper">
-  <Grid on:cellSelect={generateCellOptions} {cellFillLen} />
+  <Grid on:update={generateCellOptions} {cellFillLen} />
   <CellInfo {dict} {verticalFills} {horizontalFills} {cellFills} {cellFillLen} />
 </div>
 
