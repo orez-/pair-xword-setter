@@ -8,11 +8,27 @@
 <div id="cell-data">
   {#if dict}
     <ul>
-      <li>{horizontalFills ?? "?"} potential fills horizontally.</li>
-      <li>{verticalFills ?? "?"} potential fills vertically.</li>
+      <li>{horizontalFills?.length ?? "?"} potential fills horizontally.
+        {#if horizontalFills}
+          <div class="word-grid">
+            {#each horizontalFills.slice(0, 100) as entry}
+              <div>{entry.entry.word}</div>
+            {/each}
+          </div>
+        {/if}
+      </li>
+      <li>{verticalFills?.length ?? "?"} potential fills vertically.
+        {#if verticalFills}
+          <div class="word-grid">
+            {#each verticalFills.slice(0, 100) as entry}
+              <div>{entry.entry.word}</div>
+            {/each}
+          </div>
+        {/if}
+      </li>
       <li>{cellFills?.length ?? "?"} potential fills for this cell:
         {#if cellFills}
-          <div class="grid">
+          <div class="letter-grid">
             {#each cellFills as fill}
               <a>{fill}</a>
             {/each}
@@ -42,7 +58,12 @@
     font-family: Arial;
   }
 
-  .grid {
+  .word-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .letter-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(2em, 1fr));
   }

@@ -30,7 +30,7 @@
       if (pattern.some(cell => cell)) {
         const { gridFills, cellFills } = dict.filterFit(pattern, index);
         allCellFills = cellFills;
-        return gridFills.length;
+        return gridFills;
       }
       return null;
     }

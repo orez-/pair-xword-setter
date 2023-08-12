@@ -100,6 +100,7 @@ function filterFit(gridChunks, pivotIndex) {
       }
     }
   }
+  gridFills.sort((a, b) => b.entry.score - a.entry.score);
   return { gridFills, cellFills: pivotFills };
 }
 

@@ -87,21 +87,25 @@
         }
         break;
       case 37: // <
+        evt.preventDefault();
         if (selected && selected.x > 0) {
           setSelected({x: selected.x - 1, y: selected.y});
         }
         break;
       case 38: // ^
+        evt.preventDefault();
         if (selected && selected.y > 0) {
           setSelected({x: selected.x, y: selected.y - 1});
         }
         break;
       case 39: // >
+        evt.preventDefault();
         if (selected && selected.x < width-1) {
           setSelected({x: selected.x + 1, y: selected.y});
         }
         break;
       case 40: // v
+        evt.preventDefault();
         if (selected && selected.y < height-1) {
           setSelected({x: selected.x, y: selected.y + 1});
         }
