@@ -13,6 +13,8 @@
   });
 
   const intersect = (left, right) => {
+    // XXX: should probably clone here.
+    if (!left || !right) return left || right;
     let both = new Set;
     for (const elem of right) {
       if (left.has(elem)) {
@@ -24,19 +26,17 @@
 
   const generateCellOptions = evt => {
     let allCellFills;
-    {
-      const { pattern, index } = evt.detail.verticalPattern;
-      const { gridFills, cellFills } = dict.filterFit(pattern, index);
-      verticalFills = gridFills.length;
-      allCellFills = cellFills;
+    const getStats = ({ pattern, index }) => {
+      if (pattern.some(cell => cell)) {
+        const { gridFills, cellFills } = dict.filterFit(pattern, index);
+        allCellFills = cellFills;
+        return gridFills.length;
+      }
+      return null;
     }
 
-    {
-      const { pattern, index } = evt.detail.horizontalPattern;
-      const { gridFills, cellFills } = dict.filterFit(pattern, index);
-      horizontalFills = gridFills.length;
-      allCellFills = intersect(allCellFills, cellFills);
-    }
+    verticalFills = getStats(evt.detail.verticalPattern);
+    horizontalFills = getStats(evt.detail.horizontalPattern);
     cellFills = [...allCellFills];
     cellFills.sort();
   }
