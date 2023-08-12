@@ -4,6 +4,7 @@
   import CellInfo from '../CellInfo.svelte';
   import loadDict from '../dict.js';
 
+  const cellFillLen = 2;
   let dict = null;
   let verticalFills = null;
   let horizontalFills = null;
@@ -37,6 +38,20 @@
 
     verticalFills = getStats(evt.detail.verticalPattern);
     horizontalFills = getStats(evt.detail.horizontalPattern);
+
+    // Limit to entries that are fill-able on the other axis.
+    // XXX: should this be toggleable?
+    verticalFills = verticalFills?.filter(({ entry, pivotIdx }) => {
+      let idx = pivotIdx * cellFillLen;
+      let pivot = entry.word.slice(idx, idx + cellFillLen);
+      return allCellFills.has(pivot);
+    });
+    horizontalFills = horizontalFills?.filter(({ entry, pivotIdx }) => {
+      let idx = pivotIdx * cellFillLen;
+      let pivot = entry.word.slice(idx, idx + cellFillLen);
+      return allCellFills.has(pivot);
+    });
+
     cellFills = [...allCellFills];
     cellFills.sort();
   }
