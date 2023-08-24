@@ -6,6 +6,7 @@
   export let cellFills;
   export let cellFillLen;
 
+  const suggestedWordLimit = 100;
   const dispatch = createEventDispatcher();
 
   const highlightEntry = ({entry, pivotIdx}) => {
@@ -24,7 +25,7 @@
       <li>{acrossFills?.length ?? "?"} potential across fills.
         {#if acrossFills}
           <div class="word-grid">
-            {#each acrossFills.slice(0, 100) as entry}
+            {#each acrossFills.slice(0, suggestedWordLimit) as entry}
               <a on:click={() => dispatch('fillAcross', {
                   word: entry.entry.word,
                   pivotIdx: entry.pivotIdx,
@@ -39,7 +40,7 @@
       <li>{downFills?.length ?? "?"} potential down fills.
         {#if downFills}
           <div class="word-grid">
-            {#each downFills.slice(0, 100) as entry}
+            {#each downFills.slice(0, suggestedWordLimit) as entry}
               <a on:click={() => dispatch('fillDown', {
                   word: entry.entry.word,
                   pivotIdx: entry.pivotIdx,

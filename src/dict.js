@@ -37,7 +37,7 @@ function filterFit(gridChunks, pivotIndex) {
   // `anchor` is the real-ass text closest to our pivot point.
   //   we use this to lookup potential words.
   // `pivot` is our focal cell. It's probably empty, but it _must_
-  //   but included within the suggested word.
+  //   be included within the suggested word.
   const fitEm = anchorIdx => {
     let anchor = gridChunks[anchorIdx];
     let words = this.chunkIndex.get(anchor) || [];
