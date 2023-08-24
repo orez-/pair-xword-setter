@@ -12,7 +12,7 @@
 
   let selected = null;
   let grid = Array(width * height).fill(null)
-    .map(() => ({wall: false, fill: ""}));
+    .map(() => ({wall: false, fill: "", number: null}));
 
   const setSelected = sel => {
     selected = sel;
@@ -124,7 +124,36 @@
     if (grid[idx].wall) {
       grid[idx].fill = "";
     }
+    renumber();
     dispatchUpdate();
+  }
+
+  const renumber = () => {
+    let num = 1;
+    const setNum = idx => {
+      if (!grid[idx].wall) {
+        grid[idx].number = num;
+        num++;
+      }
+    };
+
+    for (let x = 0; x < width; x++) {
+      grid[x].number = null;
+      setNum(x);
+    }
+
+    for (let y = 1; y < height; y++) {
+      const row = y * width;
+      grid[row].number = null;
+      setNum(row);
+      for (let x = 1; x < width; x++) {
+        const idx = row + x;
+        grid[idx].number = null;
+        if (grid[idx-1].wall || grid[idx-width].wall) {
+          setNum(idx);
+        }
+      }
+    }
   }
 
   const handleKey = evt => {
@@ -196,6 +225,8 @@
         }
     }
   };
+
+  renumber()
 </script>
 
 <svelte:window on:keydown={handleKey} />
@@ -211,7 +242,12 @@
           class:error={cell.fill.length > 0 && cell.fill.length < cellFillLen}
           on:click={() => setSelected({x, y})}
           on:contextmenu={evt => toggleWall(evt, x, y)}
-        >{cell.fill}</div>
+        >
+          {#if cell.number}
+            <span class="cell-number">{cell.number}</span>
+          {/if}
+          <span class="cell-fill">{cell.fill}</span>
+        </div>
       {/each}
     {/each}
   </div>
@@ -231,11 +267,12 @@
 
   .cell {
     background-color: white;
-    width: 1.5em;
-    height: 1.5em;
+    width: 2em;
+    height: 2em;
     text-align: center;
     font-family: "DejaVu Sans Mono", monospace;
     user-select: none;
+    position: relative;
   }
 
   .error {
@@ -252,5 +289,21 @@
 
   .wall {
     background-color: #111;
+  }
+
+  .cell-number {
+    font-size: 0.5em;
+    left: 1px;
+    top: 1px;
+    position: absolute;
+  }
+
+  .cell-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 2px;
+    margin-left: auto;
+    margin-right: auto;
   }
 </style>
