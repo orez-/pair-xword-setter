@@ -24,7 +24,7 @@
     }));
 
   const setSelected = sel => {
-    selected = sel;
+    selected = {x: sel.x, y: sel.y, x2: sel.x, y2: sel.y};
     dispatchUpdate();
   }
 
@@ -184,6 +184,12 @@
     }
   }
 
+  const handleCellMouseOver = ({event, x, y}) => {
+    if (event.buttons != 1 || selected?.state !== "area") return;
+    selected.x2 = x;
+    selected.y2 = y;
+  }
+
   const handleKey = evt => {
     switch (evt.keyCode) {
       case 9: // tab
@@ -254,12 +260,25 @@
     }
   };
 
+  const cellIsSelected = (selected, x, y) => {
+    if (!selected) return false;
+    const min_x = Math.min(selected.x, selected.x2);
+    const max_x = Math.max(selected.x, selected.x2);
+    const min_y = Math.min(selected.y, selected.y2);
+    const max_y = Math.max(selected.y, selected.y2);
+    return min_x <= x && x <= max_x &&
+      min_y <= y && y <= max_y;
+  }
+
   renumber();
   $: selAcrossClueCell = acrossClueCell({...selected, grid});
   $: selDownClueCell = downClueCell({...selected, grid});
 </script>
 
-<svelte:window on:keydown={handleKey} />
+<svelte:window
+  on:keydown={handleKey}
+  on:mouseup={() => selected.state = null}
+/>
 <div id="grid-wrapper">
   <div id="grid"
     style="grid-template-columns: repeat({width}, 1fr)"
@@ -267,13 +286,20 @@
   >
     {#each {length: height} as _, y }
       {#each {length: width} as _, x }
-        {@const isSelected = selected && selected.x == x && selected.y == y}
         {@const cell = grid[width * y + x]}
+        {@const isSelected = selected && selected.x == x && selected.y == y}
         <div class="cell"
+          class:selected-area={cellIsSelected(selected, x, y)}
           class:selected={isSelected}
           class:wall={cell.wall}
           class:error={cell.fill.length > 0 && cell.fill.length < cellFillLen}
-          on:click={() => setSelected({x, y})}
+          on:mousedown={evt => {
+            if (evt.buttons === 1) {
+              setSelected({x, y});
+              selected.state = "area";
+            }
+          }}
+          on:mouseover={event => handleCellMouseOver({event, x, y})}
           on:contextmenu={evt => toggleWall(evt, x, y)}
         >
           {#if cell.number}
@@ -330,12 +356,20 @@
     background-color: lightpink;
   }
 
-  .selected.wall {
+  .selected.selected-area.wall {
     background-color: #441;
   }
 
-  .selected {
+  .selected.selected-area {
     background-color: yellow;
+  }
+
+  .selected-area.wall {
+    background-color: #234;
+  }
+
+  .selected-area {
+    background-color: #ace;
   }
 
   .wall {
