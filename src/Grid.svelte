@@ -11,8 +11,17 @@
   const dispatch = createEventDispatcher();
 
   let selected = null;
+  $: selectedCell = selected && grid[selected.x + selected.y * width];
+  $: showClues = selectedCell && !selectedCell.wall;
+
   let grid = Array(width * height).fill(null)
-    .map(() => ({wall: false, fill: "", number: null}));
+    .map(() => ({
+      wall: false,
+      fill: "",
+      number: null,
+      downClue: null,
+      acrossClue: null,
+    }));
 
   const setSelected = sel => {
     selected = sel;
@@ -20,6 +29,7 @@
   }
 
   const dispatchUpdate = () => {
+    if (!selected) return;
     let idx = selected.y * width + selected.x;
     dispatch('update', {
       downPattern: downPattern(selected),
@@ -100,6 +110,7 @@
       grid[idx].fill = "";
       grid[idx].wall = true;
     }
+    renumber();
     dispatchUpdate();
   };
 
@@ -107,6 +118,18 @@
   const setDownFill = downStep(setFill);
   export const setAcrossFillAtSelected = ({...args}) => setAcrossFill({...selected, ...args});
   export const setDownFillAtSelected = ({...args}) => setDownFill({...selected, ...args});
+
+  const frontClueCell = ({front, step, x, y, grid}) => {
+    // unselected value is an empty object
+    // because it simplifies the svelte binds
+    if (x == null || y == null) return {};
+    let idx = x + width * y;
+    if (!grid[idx]) return null;
+    for (; idx >= front && !grid[idx].wall; idx -= step) { }
+    return grid[idx + step];
+  };
+  const acrossClueCell = acrossStep(frontClueCell);
+  const downClueCell = downStep(frontClueCell);
 
   // ===
 
@@ -130,28 +153,33 @@
 
   const renumber = () => {
     let num = 1;
-    const setNum = idx => {
-      if (!grid[idx].wall) {
-        grid[idx].number = num;
+    const setNum = ({idx, topBounded, leftBounded}) => {
+      const cell = grid[idx];
+      const bounded = topBounded || leftBounded;
+      cell.number = null;
+      if (!topBounded) cell.downClue = null;
+      if (!leftBounded) cell.acrossClue = null;
+      if (!cell.wall && bounded) {
+        cell.number = num;
         num++;
       }
     };
 
+    let prevWall = true;
     for (let x = 0; x < width; x++) {
-      grid[x].number = null;
-      setNum(x);
+      setNum({idx: x, topBounded: true, leftBounded: prevWall});
+      prevWall = grid[x].wall;
     }
 
     for (let y = 1; y < height; y++) {
       const row = y * width;
-      grid[row].number = null;
-      setNum(row);
+      const topBounded = grid[row-width].wall;
+      setNum({idx: row, topBounded, leftBounded: true});
       for (let x = 1; x < width; x++) {
         const idx = row + x;
-        grid[idx].number = null;
-        if (grid[idx-1].wall || grid[idx-width].wall) {
-          setNum(idx);
-        }
+        const topBounded = grid[idx-width].wall;
+        const leftBounded = grid[idx-1].wall;
+        setNum({idx, topBounded, leftBounded});
       }
     }
   }
@@ -226,12 +254,17 @@
     }
   };
 
-  renumber()
+  renumber();
+  $: selAcrossClueCell = acrossClueCell({...selected, grid});
+  $: selDownClueCell = downClueCell({...selected, grid});
 </script>
 
 <svelte:window on:keydown={handleKey} />
 <div id="grid-wrapper">
-  <div id="grid" style="grid-template-columns: repeat({width}, 1fr)">
+  <div id="grid"
+    style="grid-template-columns: repeat({width}, 1fr)"
+    on:contextmenu={evt => evt.preventDefault()}
+  >
     {#each {length: height} as _, y }
       {#each {length: width} as _, x }
         {@const isSelected = selected && selected.x == x && selected.y == y}
@@ -251,6 +284,24 @@
       {/each}
     {/each}
   </div>
+  {#if showClues}
+    <div class="clue">
+      <label for="across-clue">{selAcrossClueCell.number}A</label>
+      <input id="across-clue"
+        type="text"
+        bind:value={selAcrossClueCell.acrossClue}
+        on:keydown={evt => evt.stopPropagation()}
+      />
+    </div>
+    <div class="clue">
+      <label for="down-clue">{selDownClueCell.number}D</label>
+      <input id="down-clue"
+        type="text"
+        bind:value={selDownClueCell.downClue}
+        on:keydown={evt => evt.stopPropagation()}
+      />
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -305,5 +356,13 @@
     bottom: 2px;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .clue label {
+    display: block;
+  }
+
+  .clue input {
+    width: 100%;
   }
 </style>
