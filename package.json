@@ -1,5 +1,5 @@
 {
-	"name": "site2",
+	"name": "pair-xword",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -13,5 +13,8 @@
 		"svelte": "^4.0.5",
 		"vite": "^4.4.2"
 	},
-	"type": "module"
+	"type": "module",
+	"dependencies": {
+		"xword-puz": "https://github.com/orez-/xword-puz/releases/download/0.1.3/xword-puz-0.1.3.tgz"
+	}
 }

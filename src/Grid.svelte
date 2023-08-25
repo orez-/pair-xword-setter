@@ -1,5 +1,6 @@
 <script>
-  import { createEventDispatcher } from 'svelte';
+  import { createEventDispatcher, onMount } from 'svelte';
+  import init, { generate_puz } from "xword-puz";
   import { chunked as chunkedGen } from './util';
 
   export let cellFillLen;
@@ -13,6 +14,7 @@
   let selected = null;
   $: selectedCell = selected && grid[selected.x + selected.y * width];
   $: showClues = selectedCell && !selectedCell.wall;
+  $: isAreaSelected = selected && (selected.x != selected.x2 || selected.y != selected.y2);
 
   let grid = Array(width * height).fill(null)
     .map(() => ({
@@ -151,14 +153,16 @@
     dispatchUpdate();
   }
 
-  const renumber = () => {
+  const renumberSubgrid = (grid, width, height) => {
     let num = 1;
     const setNum = ({idx, topBounded, leftBounded}) => {
       const cell = grid[idx];
       const bounded = topBounded || leftBounded;
       cell.number = null;
-      if (!topBounded) cell.downClue = null;
-      if (!leftBounded) cell.acrossClue = null;
+      if (topBounded) cell.downClue ??= "";
+      else cell.downClue = null;
+      if (leftBounded) cell.acrossClue ??= "";
+      else cell.acrossClue = null;
       if (!cell.wall && bounded) {
         cell.number = num;
         num++;
@@ -183,6 +187,8 @@
       }
     }
   }
+
+  const renumber = () => renumberSubgrid(grid, width, height);
 
   const handleCellMouseOver = ({event, x, y}) => {
     if (event.buttons != 1 || selected?.state !== "area") return;
@@ -270,16 +276,89 @@
       min_y <= y && y <= max_y;
   }
 
-  renumber();
+  const downloadURL = (data, fileName) => {
+    const a = document.createElement('a');
+    a.href = data;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.style.display = 'none';
+    a.click();
+    a.remove();
+  }
+
+  const downloadBlob = (data, fileName, mimeType) => {
+    const blob = new Blob([data], {
+      type: mimeType
+    });
+    const url = window.URL.createObjectURL(blob);
+    downloadURL(url, fileName);
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+  }
+
+  const exportPuz = () => {
+    let min_x;
+    let max_x;
+    let min_y;
+    let max_y;
+    if (isAreaSelected) {
+      min_x = Math.min(selected.x, selected.x2);
+      max_x = Math.max(selected.x, selected.x2);
+      min_y = Math.min(selected.y, selected.y2);
+      max_y = Math.max(selected.y, selected.y2);
+    } else {
+      min_x = 0;
+      min_y = 0;
+      max_x = width-1;
+      max_y = height-1;
+    }
+
+    const subgrid = [];
+    const subwidth = max_y - min_y + 1;
+    const subheight = max_x - min_x + 1;
+    for (let y = min_y; y <= max_y; y++) {
+      for (let x = min_x; x <= max_x; x++) {
+        const idx = y * width + x;
+        subgrid.push({...grid[idx]});
+      }
+    }
+    renumberSubgrid(subgrid, subwidth, subheight);
+    const acrossClues = [];
+    const downClues = [];
+    for (const cell of subgrid) {
+      if (cell.acrossClue != null) {
+        acrossClues.push([cell.number, cell.acrossClue]);
+      }
+      if (cell.downClue != null) {
+        downClues.push([cell.number, cell.downClue]);
+      }
+    }
+    const fill = subgrid.map(cell => cell.wall ? null : cell.fill);
+
+    const fileContents = generate_puz({
+      width: subwidth,
+      height: subheight,
+      grid: fill,
+      acrossClues,
+      downClues,
+    });
+    downloadBlob(fileContents, "out.puz", "application/octet-stream");
+  }
+
   $: selAcrossClueCell = acrossClueCell({...selected, grid});
   $: selDownClueCell = downClueCell({...selected, grid});
+
+  onMount(async () => {
+    renumber();
+    await init();
+  });
 </script>
 
 <svelte:window
   on:keydown={handleKey}
-  on:mouseup={() => selected.state = null}
+  on:mouseup={() => selected && (selected.state = null)}
 />
 <div id="grid-wrapper">
+  <button on:click={exportPuz}>Export{#if isAreaSelected}&nbsp;Selected{/if}</button>
   <div id="grid"
     style="grid-template-columns: repeat({width}, 1fr)"
     on:contextmenu={evt => evt.preventDefault()}
@@ -398,5 +477,9 @@
 
   .clue input {
     width: 100%;
+  }
+
+  button {
+    margin-bottom: 10px;
   }
 </style>
