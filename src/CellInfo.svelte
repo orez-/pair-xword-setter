@@ -1,4 +1,5 @@
 <script>
+  import { base } from '$app/paths';
   import { createEventDispatcher } from 'svelte';
   export let dict;
   export let acrossFills;
@@ -64,7 +65,7 @@
     </ul>
   {:else}
     <div class="spinner-container">
-      <img class="spinner" src="spinner.gif" alt="loading fill suggestions" />
+      <img class="spinner" src="{base}/spinner.gif" alt="loading fill suggestions" />
     </div>
   {/if}
 </div>

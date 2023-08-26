@@ -1,10 +1,11 @@
 const chunkLen = 2;
 
+import { base } from '$app/paths';
 import { chunked as chunkedGen, filterMap, keyToCmp } from "./util";
 const chunked = word => chunkedGen(word, chunkLen);
 
 export default async () => {
-  const file = await fetch("/dict/words.txt");
+  const file = await fetch(`${base}/dict/words.txt`);
   const text = await file.text();
   const entries = filterMap(text.split('\n'), toEntry);
   const chunkIndex = new Map;
