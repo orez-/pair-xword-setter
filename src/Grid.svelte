@@ -11,6 +11,9 @@
 
   const dispatch = createEventDispatcher();
 
+  let gridRef;
+  let title = "Untitled";
+  let author = "Anonymous";
   let selected = null;
   $: selectedCell = selected && grid[selected.x + selected.y * width];
   $: showClues = selectedCell && !selectedCell.wall;
@@ -112,6 +115,7 @@
       grid[idx].fill = "";
       grid[idx].wall = true;
     }
+    gridRef.focus();
     renumber();
     dispatchUpdate();
   };
@@ -139,6 +143,7 @@
     let idx = selected.y * width + selected.x;
     grid[idx].wall = false;  // ᖍ(∙⟞∙)ᖌ
     grid[idx].fill = fill;
+    gridRef.focus();
     dispatchUpdate();
   }
 
@@ -198,26 +203,6 @@
 
   const handleKey = evt => {
     switch (evt.keyCode) {
-      case 9: // tab
-        evt.preventDefault();
-        if (evt.shiftKey) {
-          if (selected && selected.x > 0) {
-            setSelected({x: selected.x - 1, y: selected.y});
-          } else if (selected && selected.y > 0) {
-            setSelected({x: width-1, y: selected.y - 1});
-          } else {
-            setSelected({x: width-1, y: height-1});
-          }
-        } else {
-          if (selected && selected.x < width-1) {
-            setSelected({x: selected.x + 1, y: selected.y});
-          } else if (selected && selected.y < height-1) {
-            setSelected({x: 0, y: selected.y + 1});
-          } else {
-            setSelected({x: 0, y: 0});
-          }
-        }
-        break;
       case 37: // <
         evt.preventDefault();
         if (selected && selected.x > 0) {
@@ -340,8 +325,11 @@
       grid: fill,
       acrossClues,
       downClues,
+      title,
+      author,
     });
-    downloadBlob(fileContents, "out.puz", "application/octet-stream");
+    const filename = title || "Untitled";
+    downloadBlob(fileContents, `${filename}.puz`, "application/octet-stream");
   }
 
   $: selAcrossClueCell = acrossClueCell({...selected, grid});
@@ -354,14 +342,26 @@
 </script>
 
 <svelte:window
-  on:keydown={handleKey}
   on:mouseup={() => selected && (selected.state = null)}
 />
 <div id="grid-wrapper">
-  <button on:click={exportPuz}>Export{#if isAreaSelected}&nbsp;Selected{/if}</button>
+  <div class="header">
+    <div class="meta">
+      <div class="flex-container">
+        <input class="title fill-width" type="text" bind:value={title} />
+      </div>
+      <div class="flex-container">
+        by&nbsp;<input class="fill-width" type="text" bind:value={author} />
+      </div>
+    </div>
+    <button on:click={exportPuz}>Export{#if isAreaSelected}&nbsp;Selected{/if}</button>
+  </div>
   <div id="grid"
+    tabindex="0"
     style="grid-template-columns: repeat({width}, 1fr)"
+    on:keydown={handleKey}
     on:contextmenu={evt => evt.preventDefault()}
+    bind:this={gridRef}
   >
     {#each {length: height} as _, y }
       {#each {length: width} as _, x }
@@ -392,19 +392,23 @@
   {#if showClues}
     <div class="clue">
       <label for="across-clue">{selAcrossClueCell.number}A</label>
-      <input id="across-clue"
-        type="text"
-        bind:value={selAcrossClueCell.acrossClue}
-        on:keydown={evt => evt.stopPropagation()}
-      />
+      <div class="flex-container">
+        <input id="across-clue"
+          class="fill-width"
+          type="text"
+          bind:value={selAcrossClueCell.acrossClue}
+        />
+      </div>
     </div>
     <div class="clue">
       <label for="down-clue">{selDownClueCell.number}D</label>
-      <input id="down-clue"
-        type="text"
-        bind:value={selDownClueCell.downClue}
-        on:keydown={evt => evt.stopPropagation()}
-      />
+      <div class="flex-container">
+        <input id="down-clue"
+          class="fill-width"
+          type="text"
+          bind:value={selDownClueCell.downClue}
+        />
+      </div>
     </div>
   {/if}
 </div>
@@ -435,12 +439,20 @@
     background-color: lightpink;
   }
 
+  #grid:focus .selected.wall {
+    background-color: #550;
+  }
+
+  #grid:focus .selected {
+    background-color: yellow;
+  }
+
   .selected.selected-area.wall {
     background-color: #441;
   }
 
   .selected.selected-area {
-    background-color: yellow;
+    background-color: #cc6;
   }
 
   .selected-area.wall {
@@ -475,8 +487,24 @@
     display: block;
   }
 
-  .clue input {
-    width: 100%;
+  .meta {
+    display: inline-block;
+    width: 400px;
+    margin-right: 10px;
+  }
+
+  .flex-container {
+    display: flex;
+  }
+
+  .fill-width {
+    flex: 1;
+  }
+
+  input.title {
+    font-size: 1.5em;
+    display: block;
+    margin-bottom: 5px;
   }
 
   button {
