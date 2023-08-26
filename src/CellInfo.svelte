@@ -64,7 +64,7 @@
     </ul>
   {:else}
     <div class="spinner-container">
-      <img class="spinner" src="spinner.gif" />
+      <img class="spinner" src="spinner.gif" alt="loading fill suggestions" />
     </div>
   {/if}
 </div>

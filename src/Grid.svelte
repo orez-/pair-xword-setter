@@ -334,9 +334,9 @@
 
   $: selAcrossClueCell = acrossClueCell({...selected, grid});
   $: selDownClueCell = downClueCell({...selected, grid});
+  renumber();
 
   onMount(async () => {
-    renumber();
     await init();
   });
 </script>
