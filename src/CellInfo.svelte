@@ -30,8 +30,13 @@
               <a on:click={() => dispatch('fillAcross', {
                   word: entry.entry.word,
                   pivotIdx: entry.pivotIdx,
-                })
-              }>
+                })}
+                on:mouseover={() => dispatch('previewAcross', {
+                  word: entry.entry.word,
+                  pivotIdx: entry.pivotIdx,
+                })}
+                on:mouseout={() => dispatch('clearPreview')}
+              >
                 {@html highlightEntry(entry)}
               </a>
             {/each}
@@ -45,8 +50,13 @@
               <a on:click={() => dispatch('fillDown', {
                   word: entry.entry.word,
                   pivotIdx: entry.pivotIdx,
-                })
-              }>
+                })}
+                on:mouseover={() => dispatch('previewDown', {
+                  word: entry.entry.word,
+                  pivotIdx: entry.pivotIdx,
+                })}
+                on:mouseout={() => dispatch('clearPreview')}
+              >
                 {@html highlightEntry(entry)}
               </a>
             {/each}
@@ -57,7 +67,11 @@
         {#if cellFills}
           <div class="letter-grid">
             {#each cellFills as fill}
-              <a on:click={() => dispatch('fillCell', { fill })}>{fill}</a>
+              <a
+                on:click={() => dispatch('fillCell', { fill })}
+                on:mouseover={() => dispatch('previewCell', { fill })}
+                on:mouseout={() => dispatch('clearPreview')}
+              >{fill}</a>
             {/each}
           </div>
         {/if}

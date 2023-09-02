@@ -27,6 +27,7 @@
   }
 
   const generateCellOptions = evt => {
+    grid.clearPreview();
     if (evt.detail.cell?.wall) {
       downFills = null;
       acrossFills = null;
@@ -78,6 +79,10 @@
     on:fillAcross={evt => grid.setAcrossFillAtSelected(evt.detail)}
     on:fillDown={evt => grid.setDownFillAtSelected(evt.detail)}
     on:fillCell={evt => grid.setFillAtSelected(evt.detail.fill)}
+    on:previewAcross={evt => grid.setPreviewAcrossAtSelected(evt.detail)}
+    on:previewDown={evt => grid.setPreviewDownAtSelected(evt.detail)}
+    on:previewCell={evt => grid.setPreviewAtSelected(evt.detail.fill)}
+    on:clearPreview={evt => grid.clearPreview()}
   />
 </div>
 

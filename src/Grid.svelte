@@ -12,6 +12,7 @@
   const dispatch = createEventDispatcher();
 
   let gridRef;
+  let preview = new Map;
   let title = "Untitled";
   let author = "Anonymous";
   let selected = null;
@@ -136,6 +137,32 @@
   };
   const acrossClueCell = acrossStep(frontClueCell);
   const downClueCell = downStep(frontClueCell);
+
+  // ===
+
+  const setPreview = ({front, back, step, x, y, word, pivotIdx}) => {
+    let idx = y * width + x - pivotIdx * step;
+    preview.clear();
+    for (const chunk of chunked(word)) {
+      preview.set(idx, chunk);
+      idx += step;
+    }
+    preview = preview;
+  };
+  const setPreviewAcross = acrossStep(setPreview);
+  const setPreviewDown = downStep(setPreview);
+  export const setPreviewAcrossAtSelected = ({...args}) => setPreviewAcross({...selected, ...args});
+  export const setPreviewDownAtSelected = ({...args}) => setPreviewDown({...selected, ...args});
+  export const setPreviewAtSelected = fill => {
+    let idx = selected.y * width + selected.x;
+    preview.clear();
+    preview.set(idx, fill);
+    preview = preview;
+  };
+  export const clearPreview = () => {
+    preview.clear();
+    preview = preview;
+  }
 
   // ===
 
@@ -365,7 +392,9 @@
   >
     {#each {length: height} as _, y }
       {#each {length: width} as _, x }
-        {@const cell = grid[width * y + x]}
+        {@const idx = width * y + x}
+        {@const cell = grid[idx]}
+        {@const previewFill = preview.get(idx)}
         {@const isSelected = selected && selected.x == x && selected.y == y}
         <div class="cell"
           class:selected-area={cellIsSelected(selected, x, y)}
@@ -384,7 +413,11 @@
           {#if cell.number}
             <span class="cell-number">{cell.number}</span>
           {/if}
-          <span class="cell-fill">{cell.fill}</span>
+          {#if !cell.fill && previewFill }
+            <span class="cell-fill preview">{previewFill}</span>
+          {:else}
+            <span class="cell-fill">{cell.fill}</span>
+          {/if}
         </div>
       {/each}
     {/each}
@@ -481,6 +514,10 @@
     bottom: 2px;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .preview {
+    color: darkgray;
   }
 
   .clue label {
